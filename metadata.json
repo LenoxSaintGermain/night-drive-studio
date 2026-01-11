@@ -1,0 +1,5 @@
+{
+  "name": "NightDriveStudio",
+  "description": "A cinematic, glass-morphism creative suite for designing and generating night drive videos using Gemini Veo. Features a collapsible timeline, command palette, and immersive HUD.",
+  "requestFramePermissions": []
+}
