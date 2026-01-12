@@ -89,24 +89,57 @@ const SceneDNA = ({ scene, setScene }: { scene: Scene; setScene: (s: Scene) => v
 
 const MomentLibrary = ({ onAdd }: { onAdd: (m: Moment) => void }) => {
   const [filter, setFilter] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   
-  const filtered = MOCK_MOMENTS.filter(m => m.title.toLowerCase().includes(filter.toLowerCase()));
+  const categories = [
+    { id: 'all', label: 'All' },
+    { id: 'visual', label: 'Visual' },
+    { id: 'action', label: 'Action' },
+    { id: 'audio', label: 'Audio' },
+    { id: 'camera_movements', label: 'Camera' },
+    { id: 'lighting_effects', label: 'Lighting' },
+  ];
+
+  const filtered = MOCK_MOMENTS.filter(m => {
+    const matchesSearch = m.title.toLowerCase().includes(filter.toLowerCase());
+    const matchesCategory = activeCategory === 'all' || m.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="p-8 max-w-6xl mx-auto h-full flex flex-col">
-       <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input 
-                    type="text" 
-                    placeholder="Search moments..." 
-                    className="w-full bg-zinc-900/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                    value={filter}
-                    onChange={e => setFilter(e.target.value)}
-                />
+       <div className="space-y-4 mb-6">
+            <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input 
+                        type="text" 
+                        placeholder="Search moments..." 
+                        className="w-full bg-zinc-900/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        value={filter}
+                        onChange={e => setFilter(e.target.value)}
+                    />
+                </div>
+                <div className="text-xs text-zinc-500 font-mono">
+                    {filtered.length} ITEMS
+                </div>
             </div>
-            <div className="text-xs text-zinc-500 font-mono">
-                {filtered.length} ITEMS
+            
+            {/* Category Filter Pills */}
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {categories.map((cat) => (
+                    <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id)}
+                        className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            activeCategory === cat.id 
+                            ? 'bg-white text-black shadow-lg shadow-white/10' 
+                            : 'bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white hover:border-white/30'
+                        }`}
+                    >
+                        {cat.label}
+                    </button>
+                ))}
             </div>
        </div>
        
@@ -114,11 +147,21 @@ const MomentLibrary = ({ onAdd }: { onAdd: (m: Moment) => void }) => {
             {filtered.map((moment) => (
                 <motion.div
                     key={moment.id}
-                    whileHover={{ scale: 1.02 }}
+                    layoutId={moment.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onAdd(moment)}
-                    className="bg-zinc-900/30 border border-white/5 hover:border-cyan-500/30 rounded-lg p-4 cursor-pointer group transition-all"
+                    className="bg-zinc-900/30 border border-white/5 hover:border-cyan-500/30 rounded-lg p-4 cursor-pointer group transition-all relative overflow-hidden"
                 >
+                    <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <div className="bg-cyan-500/10 text-cyan-400 text-[9px] font-mono px-1.5 py-0.5 rounded border border-cyan-500/20 uppercase">
+                             {moment.category.replace('_', ' ')}
+                         </div>
+                    </div>
+
                     <div className="flex justify-between items-start mb-3">
                         <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-cyan-400 transition-colors">
                             {getIcon(moment.icon)}

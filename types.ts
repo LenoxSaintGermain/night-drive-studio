@@ -13,7 +13,7 @@ export interface Moment {
   description: string;
   duration: number; // in seconds
   icon?: string;
-  category: 'visual' | 'action' | 'audio';
+  category: 'visual' | 'action' | 'audio' | 'camera_movements' | 'lighting_effects';
 }
 
 export interface TimelineItem extends Moment {
